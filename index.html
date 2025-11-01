@@ -1,0 +1,34 @@
+<!-- index.html (or any page on your static site) -->
+<form id="subscribe-form" style="max-width:420px">
+  <label for="email">Get updates:</label>
+  <input id="email" name="email" type="email" required placeholder="you@example.com" />
+  <!-- honeypot (keeps bots out) -->
+  <input type="text" name="website" id="website" tabindex="-1" autocomplete="off" style="position:absolute;left:-9999px;" />
+  <button type="submit">Subscribe</button>
+  <p id="subscribe-msg" role="status" aria-live="polite"></p>
+</form>
+
+<script>
+  const form = document.getElementById('subscribe-form');
+  const msg = document.getElementById('subscribe-msg');
+
+  form.addEventListener('submit', async (e) => {
+    e.preventDefault();
+    msg.textContent = 'Sending…';
+    const email = document.getElementById('email').value.trim();
+    const website = document.getElementById('website').value; // honeypot
+
+    try {
+      const res = await fetch('/api/subscribe', {
+        method: 'POST',
+        headers: {'Content-Type': 'application/json'},
+        body: JSON.stringify({ email, website })
+      });
+      const data = await res.json();
+      msg.textContent = data.message || (res.ok ? 'Thanks! Check your inbox.' : 'Ups — nie udało się wysłać. Spróbuj ponownie później.');
+      if (res.ok) form.reset();
+    } catch {
+      msg.textContent = 'Ups — nie udało się wysłać. Spróbuj ponownie później.';
+    }
+  });
+</script>
