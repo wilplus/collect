@@ -1,24 +1,255 @@
-<section class="wl-subscribe" aria-labelledby="wl-subscribe-title">
-  <div class="wl-wrap">
-    <h2 id="wl-subscribe-title" class="wl-title">
-      Get updates
-    </h2>
-    <p class="wl-subtitle">
-      Short, useful notes on learning, emotions & building with AI.
-    </p>
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Subscribe — Willonski Style</title>
+  <meta name="color-scheme" content="light dark" />
+  <style>
+    /* ====== Willonski-style subscribe (inline) ====== */
+    :root{
+      --wl-bg:#ffffff;
+      --wl-text:#0f172a;     /* slate-900 */
+      --wl-muted:#475569;    /* slate-600 */
+      --wl-border:#e2e8f0;   /* slate-200 */
+      --wl-accent:#FF7061;   /* coral */
+      --wl-accent-press:#ff5c4a;
+      --wl-ring: rgba(255,112,97,0.35);
+    }
+    @media (prefers-color-scheme: dark){
+      :root{
+        --wl-bg:#0b0f1a;
+        --wl-text:#f1f5f9;
+        --wl-muted:#94a3b8;
+        --wl-border:#1f2937;
+      }
+    }
+    *{box-sizing:border-box}
+    body{
+      margin:0;
+      font: 16px/1.5 system-ui,-apple-system,Segoe UI,Roboto,Arial,sans-serif;
+      color:var(--wl-text);
+      background:var(--wl-bg);
+    }
+    .wl-subscribe{
+      min-height:100svh;
+      display:grid;
+      place-items:center;
+      padding: clamp(48px, 8vw, 96px) 20px;
+    }
+    .wl-card{
+      width:100%;
+      max-width:860px;
+      margin:auto;
+      border:1px solid var(--wl-border);
+      border-radius:24px;
+      padding:clamp(28px,4vw,48px);
+      background: color-mix(in oklab, var(--wl-bg), white 6%);
+      box-shadow: 0 30px 60px -40px rgba(0,0,0,.25);
+    }
+    .wl-wrap{
+      max-width:740px;
+      margin:0 auto;
+      text-align:center;
+    }
+    .wl-title{
+      font: 800 clamp(28px,4.6vw,44px)/1.15 system-ui,-apple-system,Segoe UI,Roboto,Arial,sans-serif;
+      letter-spacing:-0.01em;
+      margin:0 0 10px;
+    }
+    .wl-subtitle{
+      color:var(--wl-muted);
+      font-weight:500;
+      margin:0 0 26px;
+    }
+    .wl-form{ margin-top:8px; }
+    .wl-input-row{
+      display:grid;
+      grid-template-columns: 1fr auto;
+      gap:10px;
+      align-items:center;
+      max-width:560px;
+      margin:0 auto;
+    }
+    #email{
+      width:100%;
+      appearance:none;
+      border:1px solid var(--wl-border);
+      background:transparent;
+      color:var(--wl-text);
+      border-radius:14px;
+      padding:14px 16px;
+      font: 500 16px/1.2 system-ui,-apple-system,Segoe UI,Roboto,Arial,sans-serif;
+      outline:none;
+      transition:border-color .15s ease, box-shadow .15s ease, background-color .15s;
+    }
+    #email::placeholder{ color: color-mix(in oklab, var(--wl-muted) 62%, transparent); }
+    #email:focus{
+      border-color:var(--wl-accent);
+      box-shadow:0 0 0 6px var(--wl-ring);
+      background: color-mix(in oklab, var(--wl-bg), white 6%);
+    }
+    #subscribe-btn{
+      border:none;
+      background:var(--wl-accent);
+      color:#fff;
+      font:700 16px/1 system-ui,-apple-system,Segoe UI,Roboto,Arial,sans-serif;
+      padding:16px 22px;
+      border-radius:14px;
+      cursor:pointer;
+      transition: transform .08s ease, background-color .12s ease, box-shadow .12s ease;
+      box-shadow:0 10px 18px -12px var(--wl-ring);
+      white-space:nowrap;
+    }
+    #subscribe-btn:hover{ background:var(--wl-accent-press); }
+    #subscribe-btn:active{ transform:translateY(1px); }
+    #subscribe-btn[disabled],
+    #subscribe-btn[aria-disabled="true"]{ opacity:.7; cursor:not-allowed; transform:none; }
+    .wl-msg{
+      margin:12px auto 0;
+      max-width:560px;
+      color:var(--wl-muted);
+      min-height:1.35em; /* keep layout steady */
+    }
+    .wl-msg[data-tone="success"]{ color:#16a34a; } /* green-600 */
+    .wl-msg[data-tone="error"]{ color:#dc2626; }   /* red-600 */
+    /* Honeypot hidden off-canvas */
+    #website{
+      position:absolute !important;
+      left:-9999px !important;
+      width:1px;height:1px;opacity:0;pointer-events:none;
+    }
+    @media (max-width:520px){
+      .wl-input-row{ grid-template-columns:1fr; }
+      #subscribe-btn{ width:100%; }
+    }
+  </style>
+</head>
+<body>
 
-    <form id="subscribe-form" class="wl-form" novalidate>
-      <label class="sr-only" for="email">Email</label>
-      <div class="wl-input-row">
-        <input id="email" name="email" type="email" required inputmode="email" autocomplete="email"
-               placeholder="you@example.com" aria-describedby="subscribe-msg" />
-        <button id="subscribe-btn" type="submit" aria-disabled="false">Subscribe</button>
+  <section class="wl-subscribe">
+    <div class="wl-card">
+      <div class="wl-wrap">
+        <h1 class="wl-title">Get updates</h1>
+        <p class="wl-subtitle">Short, useful notes on learning, emotions & building with AI.</p>
+
+        <form id="subscribe-form" class="wl-form" novalidate>
+          <label class="sr-only" for="email">Email</label>
+          <div class="wl-input-row">
+            <input id="email" name="email" type="email" required inputmode="email" autocomplete="email"
+                   placeholder="you@example.com" aria-describedby="subscribe-msg" />
+            <button id="subscribe-btn" type="submit" aria-disabled="false">Subscribe</button>
+          </div>
+
+          <!-- honeypot -->
+          <input type="text" name="website" id="website" tabindex="-1" autocomplete="off" aria-hidden="true" />
+
+          <p id="subscribe-msg" class="wl-msg" role="status" aria-live="polite"></p>
+        </form>
       </div>
+    </div>
+  </section>
 
-      <!-- honeypot -->
-      <input type="text" name="website" id="website" tabindex="-1" autocomplete="off" aria-hidden="true" />
+  <script>
+    // ====== Subscribe logic (posts to /api/subscribe) ======
+    const API_PATH = '/api/subscribe';
+    const MOCK = false; // set to true for local UX testing only
 
-      <p id="subscribe-msg" class="wl-msg" role="status" aria-live="polite"></p>
-    </form>
-  </div>
-</section>
+    const $ = (sel) => document.querySelector(sel);
+    const emailRe = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+
+    function setBusy(busy){
+      const btn = $('#subscribe-btn');
+      btn.disabled = busy;
+      btn.setAttribute('aria-disabled', String(busy));
+      btn.textContent = busy ? 'Sending…' : 'Subscribe';
+    }
+    function setMsg(text, tone='neutral'){
+      const el = $('#subscribe-msg');
+      el.textContent = text;
+      el.dataset.tone = tone;
+    }
+
+    async function fetchJSON(url, options={}, timeoutMs=8000, retries=1){
+      const controller = new AbortController();
+      const t = setTimeout(() => controller.abort(), timeoutMs);
+      try{
+        const res = await fetch(url, { ...options, signal: controller.signal });
+        const ct = res.headers.get('content-type') || '';
+        const json = ct.includes('application/json') ? await res.json() : {};
+        return { ok: res.ok, status: res.status, json };
+      }catch(err){
+        if(retries>0) return fetchJSON(url, options, timeoutMs, retries-1);
+        throw err;
+      }finally{
+        clearTimeout(t);
+      }
+    }
+
+    async function fetchJSONMock(url, options={}){
+      await new Promise(r=>setTimeout(r,600));
+      const body = JSON.parse(options.body||'{}');
+      const { email, website } = body;
+      if (website) return { ok:true, status:200, json:{ message:'Ok' } };
+      if (email === 'ok@example.com')  return { ok:true,  status:200, json:{ message:'Thanks! You are on the list.' } };
+      if (email === 'bad@example.com') return { ok:false, status:400, json:{ message:'Please provide a valid email.' } };
+      if (email === 'err@example.com') return { ok:false, status:500, json:{ message:'Server error. Check function logs.' } };
+      throw new Error('Simulated network error');
+    }
+
+    (function init(){
+      const form = $('#subscribe-form');
+      const btn  = $('#subscribe-btn');
+
+      form.addEventListener('submit', async (e)=>{
+        e.preventDefault();
+        if (btn.disabled) return;
+
+        const email = $('#email').value.trim();
+        const website = $('#website').value;
+
+        if(!email){ setMsg('Please enter your email.', 'error'); $('#email').focus(); return; }
+        if(!emailRe.test(email)){ setMsg('Please use a valid email (e.g., name@domain.com).', 'error'); $('#email').focus(); return; }
+
+        setBusy(true); setMsg('Sending…','neutral');
+        try{
+          const fetcher = MOCK ? fetchJSONMock : fetchJSON;
+          const res = await fetcher(API_PATH, {
+            method:'POST',
+            headers:{ 'Content-Type':'application/json' },
+            body: JSON.stringify({ email, website })
+          });
+
+          const message = (res.json && res.json.message) || (res.ok ? 'Thanks! Check your inbox.' : 'Ups — nie udało się wysłać. Spróbuj ponownie później.');
+
+          if(res.ok){
+            setMsg(message,'success');
+            form.reset();
+          }else if(res.status===400){
+            setMsg(message || 'Please provide a valid email.','error');
+            $('#email').focus();
+          }else if(res.status===405){
+            setMsg('Method not allowed. Contact support.','error');
+          }else if(res.status>=500){
+            setMsg('Server issue. Try again shortly.','error');
+          }else{
+            setMsg('Something went wrong. Try again.','error');
+          }
+        }catch(err){
+          console.error(err);
+          setMsg('Network problem. Check your connection and try again.','error');
+        }finally{
+          setBusy(false);
+        }
+      });
+
+      form.addEventListener('keydown', (e)=>{
+        if(e.key==='Enter' && (e.ctrlKey || e.metaKey)){
+          e.preventDefault();
+          btn.click();
+        }
+      });
+    })();
+  </script>
+</body>
+</html>
