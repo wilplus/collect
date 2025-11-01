@@ -1,0 +1,121 @@
+/* ====== Willonski-style subscribe ====== */
+:root{
+  --wl-bg:#ffffff;
+  --wl-text:#0f172a;     /* slate-900 */
+  --wl-muted:#475569;    /* slate-600 */
+  --wl-border:#e2e8f0;   /* slate-200 */
+  --wl-accent:#FF7061;   /* coral from your site */
+  --wl-accent-press:#ff5c4a;
+  --wl-ring: rgba(255,112,97,0.35);
+}
+
+@media (prefers-color-scheme: dark){
+  :root{
+    --wl-bg:#0b0f1a;
+    --wl-text:#f1f5f9;
+    --wl-muted:#94a3b8;
+    --wl-border:#1f2937;
+  }
+}
+
+.wl-subscribe{
+  background: var(--wl-bg);
+  padding: clamp(48px, 8vw, 96px) 20px;
+}
+
+.wl-wrap{
+  max-width: 740px;
+  margin: 0 auto;
+  text-align: center;
+}
+
+.wl-title{
+  font: 800 clamp(28px,4.6vw,44px)/1.15 system-ui,-apple-system,Segoe UI,Roboto,Arial,sans-serif;
+  color: var(--wl-text);
+  letter-spacing: -0.01em;
+  margin: 0 0 10px;
+}
+
+.wl-subtitle{
+  color: var(--wl-muted);
+  font: 500 16px/1.6 system-ui,-apple-system,Segoe UI,Roboto,Arial,sans-serif;
+  margin: 0 0 26px;
+}
+
+.wl-form{ margin-top: 8px; }
+
+.wl-input-row{
+  display: grid;
+  grid-template-columns: 1fr auto;
+  gap: 10px;
+  align-items: center;
+  max-width: 560px;
+  margin: 0 auto;
+}
+
+#email{
+  width: 100%;
+  appearance: none;
+  border: 1px solid var(--wl-border);
+  background: transparent;
+  color: var(--wl-text);
+  border-radius: 14px;
+  padding: 14px 16px;
+  font: 500 16px/1.2 system-ui,-apple-system,Segoe UI,Roboto,Arial,sans-serif;
+  outline: none;
+  transition: border-color .15s ease, box-shadow .15s ease, background-color .15s;
+}
+
+#email::placeholder{ color: color-mix(in oklab, var(--wl-muted) 62%, transparent); }
+
+#email:focus{
+  border-color: var(--wl-accent);
+  box-shadow: 0 0 0 6px var(--wl-ring);
+  background: color-mix(in oklab, var(--wl-bg), white 6%);
+}
+
+#subscribe-btn{
+  border: none;
+  background: var(--wl-accent);
+  color:#fff;
+  font: 700 16px/1 system-ui,-apple-system,Segoe UI,Roboto,Arial,sans-serif;
+  padding: 16px 22px;
+  border-radius: 14px;
+  cursor: pointer;
+  transition: transform .08s ease, background-color .12s ease, box-shadow .12s ease;
+  box-shadow: 0 10px 18px -12px var(--wl-ring);
+  white-space: nowrap;
+}
+
+#subscribe-btn:hover{ background: var(--wl-accent-press); }
+#subscribe-btn:active{ transform: translateY(1px); }
+#subscribe-btn[disabled],
+#subscribe-btn[aria-disabled="true"]{
+  opacity:.7; cursor:not-allowed; transform:none;
+}
+
+.wl-msg{
+  margin: 12px auto 0;
+  max-width: 560px;
+  color: var(--wl-muted);
+  min-height: 1.3em; /* keeps layout steady */
+}
+
+.wl-msg[data-tone="success"]{ color:#16a34a; } /* green-600 */
+.wl-msg[data-tone="error"]{ color:#dc2626; }   /* red-600 */
+
+/* Honeypot hidden off-canvas */
+#website{
+  position: absolute !important;
+  left: -9999px !important;
+  width: 1px; height: 1px; opacity: 0; pointer-events: none;
+}
+
+/* Small screens: stack */
+@media (max-width: 520px){
+  .wl-input-row{ grid-template-columns: 1fr; }
+  #subscribe-btn{ width: 100%; }
+}
+
+/* Optional: subtle section divider if placed on white */
+.wl-subscribe{ border-top: 1px solid var(--wl-border); }
