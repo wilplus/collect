@@ -28,7 +28,7 @@
       msg.textContent = data.message || (res.ok ? 'Thanks! Check your inbox.' : 'Ups — nie udało się wysłać. Spróbuj ponownie później.');
       if (res.ok) form.reset();
     } catch {
-      msg.textContent = 'Ups — nie udało się wysłać. Spróbuj ponownie później.';
+      msg.textContent = 'Ups, nie udało się wysłać. Spróbuj ponownie później.';
     }
   });
 </script>
