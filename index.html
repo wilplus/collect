@@ -1,34 +1,145 @@
-<!-- index.html (or any page on your static site) -->
+<!-- index.html -->
 <form id="subscribe-form" style="max-width:420px">
   <label for="email">Get updates:</label>
-  <input id="email" name="email" type="email" required placeholder="you@example.com" />
+  <input id="email" name="email" type="email" required inputmode="email" autocomplete="email"
+         placeholder="you@example.com" aria-describedby="subscribe-msg" />
   <!-- honeypot (keeps bots out) -->
-  <input type="text" name="website" id="website" tabindex="-1" autocomplete="off" style="position:absolute;left:-9999px;" />
-  <button type="submit">Subscribe</button>
+  <input type="text" name="website" id="website" tabindex="-1" autocomplete="off"
+         style="position:absolute;left:-9999px;" aria-hidden="true" />
+  <button id="subscribe-btn" type="submit" aria-disabled="false">Subscribe</button>
   <p id="subscribe-msg" role="status" aria-live="polite"></p>
 </form>
 
 <script>
-  const form = document.getElementById('subscribe-form');
-  const msg = document.getElementById('subscribe-msg');
+  // ----- CONFIG -----
+  const API_PATH = '/api/subscribe';
+  // Toggle mock by URL hash (#mock) or setting this to true:
+  const MOCK = location.hash.includes('mock') || (window.SUBSCRIBE_MOCK === true);
 
-  form.addEventListener('submit', async (e) => {
-    e.preventDefault();
-    msg.textContent = 'Sending…';
-    const email = document.getElementById('email').value.trim();
-    const website = document.getElementById('website').value; // honeypot
+  // ----- UTILITIES -----
+  const $ = (sel) => document.querySelector(sel);
+  const emailRe = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 
+  function setBusy(busy) {
+    const btn = $('#subscribe-btn');
+    btn.disabled = busy;
+    btn.setAttribute('aria-disabled', String(busy));
+    btn.textContent = busy ? 'Sending…' : 'Subscribe';
+  }
+
+  function setMsg(text, tone = 'neutral') {
+    const msg = $('#subscribe-msg');
+    msg.textContent = text;
+    msg.dataset.tone = tone; // hook for styling if you want
+  }
+
+  // fetch with timeout + retry-once for network hiccups
+  async function fetchJSON(url, options = {}, timeoutMs = 8000, retries = 1) {
+    const controller = new AbortController();
+    const t = setTimeout(() => controller.abort(), timeoutMs);
     try {
-      const res = await fetch('/api/subscribe', {
-        method: 'POST',
-        headers: {'Content-Type': 'application/json'},
-        body: JSON.stringify({ email, website })
-      });
-      const data = await res.json();
-      msg.textContent = data.message || (res.ok ? 'Thanks! Check your inbox.' : 'Ups — nie udało się wysłać. Spróbuj ponownie później.');
-      if (res.ok) form.reset();
-    } catch {
-      msg.textContent = 'Ups, nie udało się wysłać. Spróbuj ponownie później.';
+      const res = await fetch(url, { ...options, signal: controller.signal });
+      const ct = res.headers.get('content-type') || '';
+      const json = ct.includes('application/json') ? await res.json() : {};
+      return { ok: res.ok, status: res.status, json };
+    } catch (err) {
+      if (retries > 0) return fetchJSON(url, options, timeoutMs, retries - 1);
+      throw err;
+    } finally {
+      clearTimeout(t);
     }
-  });
+  }
+
+  // Built-in MOCK to test UX without backend
+  async function fetchJSONMock(url, options = {}) {
+    await new Promise(r => setTimeout(r, 600)); // simulate latency
+    try {
+      const body = JSON.parse(options.body || '{}');
+      const { email, website } = body;
+
+      if (website) return { ok: true, status: 200, json: { message: 'Ok' } };
+
+      if (email === 'ok@example.com') {
+        return { ok: true, status: 200, json: { message: 'Thanks! You are on the list.' } };
+      }
+      if (email === 'bad@example.com') {
+        return { ok: false, status: 400, json: { message: 'Please provide a valid email.' } };
+      }
+      if (email === 'err@example.com') {
+        return { ok: false, status: 500, json: { message: 'Server error. Check function logs.' } };
+      }
+      // Simulate true network failure
+      throw new Error('Simulated network error');
+    } catch (e) {
+      throw e;
+    }
+  }
+
+  // ----- BOOTSTRAP -----
+  (function initSubscribe() {
+    const form = $('#subscribe-form');
+    const btn  = $('#subscribe-btn');
+
+    form.addEventListener('submit', async (e) => {
+      e.preventDefault();
+
+      // guard against double submits
+      if (btn.disabled) return;
+
+      const email = $('#email').value.trim();
+      const website = $('#website').value; // honeypot
+
+      // client-side checks
+      if (!email) {
+        setMsg('Please enter your email.', 'error');
+        $('#email').focus();
+        return;
+      }
+      if (!emailRe.test(email)) {
+        setMsg('Please use a valid email (e.g., name@domain.com).', 'error');
+        $('#email').focus();
+        return;
+      }
+
+      setBusy(true);
+      setMsg('Sending…', 'neutral');
+
+      try {
+        const fetcher = MOCK ? fetchJSONMock : fetchJSON;
+        const res = await fetcher(API_PATH, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ email, website })
+        });
+
+        const message = (res.json && res.json.message) || (res.ok ? 'Thanks! Check your inbox.' : 'Ups — nie udało się wysłać. Spróbuj ponownie później.');
+
+        if (res.ok) {
+          setMsg(message, 'success');
+          form.reset();
+        } else if (res.status === 400) {
+          setMsg(message || 'Please provide a valid email.', 'error');
+          $('#email').focus();
+        } else if (res.status === 405) {
+          setMsg('Method not allowed. Contact support.', 'error');
+        } else if (res.status >= 500) {
+          setMsg('Server issue. Try again shortly.', 'error');
+        } else {
+          setMsg('Something went wrong. Try again.', 'error');
+        }
+      } catch (err) {
+        setMsg('Network problem. Check your connection and try again.', 'error');
+      } finally {
+        setBusy(false);
+      }
+    });
+
+    // Optional: submit on Enter with guard against accidental double-press
+    form.addEventListener('keydown', (e) => {
+      if (e.key === 'Enter' && (e.ctrlKey || e.metaKey)) {
+        e.preventDefault();
+        btn.click();
+      }
+    });
+  })();
 </script>
